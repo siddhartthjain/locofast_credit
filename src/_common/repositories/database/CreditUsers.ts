@@ -1,5 +1,7 @@
-import { CreditUser } from "src/common/models/CreditUsers";
-import { DatabaseRepository, InjectModel } from "src/core";
+import { CreditUser } from "@app/_common/models/CreditUsers";
+import { DatabaseRepository, InjectModel } from "@libs/core";
+
+
 
 
 export class CreditUserRepository extends DatabaseRepository

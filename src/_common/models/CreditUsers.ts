@@ -1,4 +1,5 @@
-import { BaseModel } from "src/core/db";
+import { BaseModel } from "@libs/core";
+
 
 
 export class CreditUser extends BaseModel {
