@@ -1,4 +1,4 @@
-export class CreateCreditCustomerValidator
+export class InvoicingCustomerValidator
 {
     user_id: number;
     

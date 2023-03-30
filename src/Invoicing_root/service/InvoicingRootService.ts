@@ -1,74 +1,68 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { transaction } from 'objection';
-
-
-
-
-
-
 import { Response } from '@libs/core';;
 import { BaseValidator } from '@libs/core/validator';
-import { CreateCreditCustomerValidator } from '../validators/CreatecreditCustomerValidator';
+import { InvoicingCustomerValidator } from '../validators/InvoicingCustomerValidator';
 import * as crypto from "crypto";
-import { CreditCustomerContract, CreditUserContract, CREDIT_CUSTOMER_REPO, CREDIT_USER_REPO } from '@app/_common';
-import { CreditCustomer } from '@app/_common/models/CreditCustomer';
+import { InvoicingRootContract, InvoicingUserContract, INVOICING_ROOT_REPO, INVOICING_USER_REPO } from '@app/_common';
+import { InvoicingRoot } from '@app/_common/models/InvoicingRoot';
 
 
 
 @Injectable()
-export class CreditCustomerService {
+export class InvoicingRootService {
   constructor(
     private validator : BaseValidator,
-    @Inject(CREDIT_USER_REPO)
-    private creditUserRepo : CreditUserContract,
+    @Inject(INVOICING_USER_REPO)
+    private InvoicingUserRepo : InvoicingUserContract,
 
-    @Inject(CREDIT_CUSTOMER_REPO)
-    private creditCustomerRepo : CreditCustomerContract,
+    @Inject(INVOICING_ROOT_REPO)
+    private InvoicingCustomerRepo : InvoicingRootContract,
 
   ) {}
 
   
 
-  async createCreditCustomer(inputs :Record<string,any>, user: Record<string,any> ) {
+  async createInvoicingCustomer(inputs :Record<string,any>, user: Record<string,any> ) {
     const {
       user_id, 
       brand_id,  
       first_name,
       last_name = '',
-      is_credit_available = 1,
-      credit_period = 30,
-      credit_charges = 2,
+      is_Invoicing_available = 1,
+      Invoicing_period = 30,
+      Invoicing_charges = 2,
     } = inputs;
 
-    await this.validator.fire(inputs, CreateCreditCustomerValidator);
+    await this.validator.fire(inputs, InvoicingCustomerValidator);
     
     const financeManager = user.id;
     const brandSecretKey = crypto.randomBytes(16).toString('hex');
 
    
-    // newCustomer ={user_id, brand_id, first_name,last_name, is_credit_available, credit_period, credit_charges} 
-    const trx = await CreditCustomer.startTransaction();
+    // newCustomer ={user_id, brand_id, first_name,last_name, is_Invoicing_available, Invoicing_period, Invoicing_charges} 
+    const trx = await InvoicingRoot.startTransaction();
 
     try {
 
-      const result = await this.creditCustomerRepo.query(trx).insert({
+      const result = await this.InvoicingCustomerRepo.query(trx).insert({
         
         brand_id,
         first_name,
         last_name,
-        is_credit_available,
-        credit_period,
-        credit_charges,
+        is_Invoicing_available,
+        Invoicing_period,
+        Invoicing_charges,
         brandSecretKey,
         created_by: financeManager,
         modified_by: financeManager
 
       });
 
-      const creditCustomerId= result.id;
-      const result2= await this.creditUserRepo.query(trx).insert({
+      const InvoicingCustomerId= result.id;
+      const result2= await this.InvoicingUserRepo.query(trx).insert({
         user_id,
-        creditCustomerId,
+        InvoicingCustomerId,
         created_by:financeManager,
         modified_by: financeManager
       })
@@ -87,14 +81,14 @@ export class CreditCustomerService {
   async getPaymentInfo(inputs): Promise<Record<string,any>>
  {
   const id = inputs.brand_id;
-  return await this.creditCustomerRepo.getCreditInfo(id);
+  return await this.InvoicingCustomerRepo.getCreditInfo(id);
 
   // return await 
  }
 
   
-  // credit days
-  // credit charges
+  // Invoicing days
+  // Invoicing charges
 
   // customer name  
   //realtionship manager

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import {
-  CREDIT_CUSTOMER_REPO,
-  CREDIT_USER_REPO,
+ INVOICING_ROOT_REPO,
+ INVOICING_USER_REPO,
   CURRENCY_REPOSITORY,
   LF_ROOT_REPOSITORY,
   USER_REPOSITORY,
@@ -12,8 +12,8 @@ import {
   LfRootRepository,
   UserRepository,
 } from './repositories';
-import { CreditCustomerRepository } from './repositories/database/CreditCustomer';
-import { CreditUserRepository } from './repositories/database/CreditUsers';
+import { InvoicingRootRepository } from './repositories/database/InvoicingRoot';
+import { InvoicingUserRepository } from './repositories/database/Users';
 import { CurrencyService, LfRootService, UserService } from './services';
 
 @Module({
@@ -35,12 +35,12 @@ import { CurrencyService, LfRootService, UserService } from './services';
     { provide: LF_ROOT_REPOSITORY, useClass: LfRootRepository },
     { provide: CURRENCY_REPOSITORY, useClass: CurrencyRepository },
     {
-      provide: CREDIT_CUSTOMER_REPO,
-      useClass: CreditCustomerRepository,
+      provide: INVOICING_ROOT_REPO,
+      useClass: InvoicingRootRepository,
     },
     {
-      provide: CREDIT_USER_REPO,
-      useClass: CreditUserRepository,
+      provide: INVOICING_USER_REPO,
+      useClass: InvoicingUserRepository,
     },
   ],
 })
