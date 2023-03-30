@@ -2,11 +2,12 @@ import * as Knex from 'knex';
 import { id, commonFields } from '../helper';
 
 export async function up(knex: Knex): Promise<void> {
-  return knex.schema.createTable('order_files', (table) => {
+  return knex.schema.createTable('fabric_order_files', (table) => {
     id(table);
     table
       .bigInteger('order_id')
       .notNullable()
+      .unsigned()
       .references('id')
       .inTable('fabric_orders');
     table
@@ -22,4 +23,6 @@ export async function up(knex: Knex): Promise<void> {
   });
 }
 
-export async function down(knex: Knex): Promise<void> {}
+export async function down(knex: Knex): Promise<void> {
+  return knex.schema.dropTableIfExists('fabric_order_files');
+}

@@ -1,7 +1,9 @@
 import * as Knex from 'knex';
+import { id } from '../helper';
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('units', function (table) {
+    id(table)
     table.string('unit');
     table.string('short_name');
     table

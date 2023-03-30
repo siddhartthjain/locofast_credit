@@ -2,7 +2,7 @@ import * as Knex from 'knex';
 import { commonFields, id } from '../helper';
 
 export async function up(knex: Knex): Promise<void> {
-  return knex.schema.createTable('order_dispatch', function (table) {
+  return knex.schema.createTable('fabric_order_dispatch', function (table) {
     id(table);
     table
       .bigInteger('order_id')
@@ -18,5 +18,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  return knex.schema.dropTableIfExists('order_dispatch');
+  return knex.schema.dropTableIfExists('fabric_order_dispatch');
 }
