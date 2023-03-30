@@ -9,3 +9,5 @@ export const ORDER_STATUS = {
   DELIVERED: 4,
   CANCELLED: 5,
 };
+
+export const VARIABLE_QUANTITY = 5;

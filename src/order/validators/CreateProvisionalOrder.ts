@@ -1,4 +1,11 @@
-import { IsDefined, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsDefined,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateProvisionalOrder {
   @IsDefined()
@@ -14,6 +21,8 @@ export class CreateProvisionalOrder {
   fabricSpecification: string;
 
   @IsDefined()
+  @MinLength(1)
+  @MaxLength(8)
   @IsString()
   hsnCode: string;
 

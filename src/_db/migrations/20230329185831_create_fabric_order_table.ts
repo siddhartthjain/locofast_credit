@@ -35,7 +35,6 @@ export async function up(knex: Knex): Promise<void> {
     table
       .bigInteger('marked_delivered_by')
       .unsigned()
-      .notNullable()
       .references('id')
       .inTable('users');
     table
