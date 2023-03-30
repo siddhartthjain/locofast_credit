@@ -16,6 +16,8 @@ import {
 } from '../repositories';
 import { CreateProvisionalOrder } from '../validators';
 import { BaseValidator } from '@libs/core/validator';
+import { BILL_TO } from '@app/_common';
+import { calculateCreditPrice, calculateOrderValue } from '../helpers';
 
 @Injectable()
 export class ProvisionalOrderService {
@@ -30,19 +32,17 @@ export class ProvisionalOrderService {
   async createProvisionalOrder(
     inputs: Record<string, any>,
   ): Promise<Record<string, any>> {
-    // need to add validation here
     // will have user too in input
-    // billTo will be constant (need to discuss)
-    const data = await this.fabricOrder.all();
-    console.log(data);
-    return;
-    inputs.billTo = 'Locofast Online Private Limited';
-    const { fabricDetails, fabricOrderDeliveryDetails, fabricOrderDetails } =
-      await this.createProvisionalOrderCustomValidator(inputs);
+    inputs.billTo = BILL_TO;
+    const {
+      fabricDetails,
+      fabricOrderDeliveryDetails,
+      fabricOrderDetails,
+      orderValue,
+      creditPrice,
+    } = await this.createProvisionalOrderCustomValidator(inputs);
 
     let fabricOrder;
-    // will calculate using customer credit info
-    const finalPrice = 2000;
     const trx = await FabricOrder.startTransaction();
     try {
       const fabric = await this.fabricService.addFabric(fabricDetails, trx);
@@ -53,7 +53,6 @@ export class ProvisionalOrderService {
         ...fabricOrderDetails,
         fabric_id: fabric.id,
         delivery_id: orderDeliveryDetails.id,
-        final_price: finalPrice,
       });
       await trx.commit();
     } catch (error) {
@@ -83,15 +82,10 @@ export class ProvisionalOrderService {
     } = inputs;
 
     await this.validator.fire(inputs, CreateProvisionalOrder);
-    /* const hsnRegex = new RegExp(
-      '/^[0-9]{2}s*[0-9]{2}s*[0-9]{2}s*[0-9]{2}s*[0-9]{2}$/',
-    );
-    if (!hsnRegex.test(hsnCode)) {
-      console.log('shi dal le hsn code');
-      throw new ValidationFailed({
-        message: 'Wrong HSN code',
-      });
-    }*/
+    // will be check from database
+    const creditCharges = 2;
+    const orderValue = calculateOrderValue(procurementPrice, quantity);
+    const creditPrice = calculateCreditPrice(orderValue, creditCharges);
 
     const fabricDetails = {
       brandId,
@@ -105,8 +99,8 @@ export class ProvisionalOrderService {
       estimatedDeliveryDate,
       terms,
       brand_address_id: brandDeliveryAddressId,
-      created_by: 1342,
-      modified_by: 1342,
+      created_by: 1,
+      modified_by: 1,
     };
 
     const fabricOrderDetails = {
@@ -115,8 +109,10 @@ export class ProvisionalOrderService {
       quantity,
       procurement_price: procurementPrice,
       unit_id: unitId,
-      created_by: 1342,
-      modified_by: 1342,
+      order_value: orderValue,
+      credit_price: creditPrice,
+      created_by: 1,
+      modified_by: 1,
     };
 
     return {

@@ -2,9 +2,15 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { FabricContract } from 'src/fabric';
-import { FABRIC_ORDER_REPOSITORY, ORDER_STATUS } from '../constants';
+import {
+  FABRIC_ORDER_DELIVERY_ADDRESS_REPOSITORY,
+  FABRIC_ORDER_REPOSITORY,
+  ORDER_STATUS,
+} from '../constants';
+import { checkQuantity } from '../helpers';
 import { FabricOrder } from '../models';
 
 @Injectable()
@@ -21,11 +27,12 @@ export class OrderService {
         .query(trx)
         .patch({
           status: ORDER_STATUS.DISPATCHED,
+          modified_by: 2,
         })
         .where({
           id: orderId,
         });
-      // will have to add modifiedBy field too (Supplier)
+
       // have to upload files too
       await trx.commit();
     } catch (error) {
@@ -62,5 +69,20 @@ export class OrderService {
       throw new InternalServerErrorException('Something went wrong');
     }
     return;
+  }
+
+  async dispatchOrderCustomValidator(
+    inputs: Record<string, any>,
+  ): Promise<Record<string, any>> {
+    const { orderId, quantity, dispatchDate } = inputs;
+    const fabricOrder = await this.fabricOrder.firstWhere({ id: orderId });
+    if (!checkQuantity(fabricOrder.quantity, quantity)) {
+      throw new UnprocessableEntityException('This is not the order quantity');
+    }
+    const dispatchDetails = {
+      quantity,
+      dispatch_date: dispatchDate,
+    };
+    return { dispatchDetails };
   }
 }
