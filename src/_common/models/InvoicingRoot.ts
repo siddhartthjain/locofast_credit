@@ -1,8 +1,8 @@
 import { BaseModel } from "@libs/core/db";
 
 
-export class CreditCustomer extends BaseModel {
-  static tableName = 'credit_customer';
+export class InvoicingRoot extends BaseModel {
+  static tableName = 'invoicing_root';
 
   static relationMappings = {
     fabricOrders: {
