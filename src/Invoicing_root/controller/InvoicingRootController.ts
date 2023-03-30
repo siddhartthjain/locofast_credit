@@ -1,32 +1,32 @@
 import { Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from '@libs/core';
-import { CreditCustomerService } from '../service/CreditCustomerService';
+import { InvoicingRootService } from '../service/InvoicingRootService';
 
-@Controller('credit-customer')
-export class CreditCustomerController {
-  constructor(private creditCustomerService: CreditCustomerService) {}
+@Controller('InvoicingRoot')
+export class InvoicingRootController {
+  constructor(private InvoicingCustomerService: InvoicingRootService) {}
 
 
  @Post('/create')
-  async createCreditCustomer(
+  async createRoot(
     @Req() req :Request,
     @Res() res :Response
   ):Promise<any>
   {
     const inputs = req.all();
     const user = req.user;
-    return await this.creditCustomerService.createCreditCustomer(inputs, user);
+    return await this.InvoicingCustomerService.createInvoicingCustomer(inputs, user);
   }
 
 
   @Get()
-  async getcredituser(
+  async getInvoicinguser(
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<Response> {
     const inputs = req.all();
     const user = req.user;
 
-    return this.creditCustomerService.get(inputs, user);
+    return this.InvoicingCustomerService.get(inputs, user);
   }
 }

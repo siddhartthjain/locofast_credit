@@ -65,6 +65,7 @@ export const CUSTOMER_NOTIFICATION_TYPES = {
   RETURN_WINDOW_CLOSING_ALERT: 113,
 };
 // export const LF_ROOT_REPOSITORY = 'LF_ROOT_REPOSITORY';
+
 export const CREDIT_CUSTOMER_REPO = 'CREDIT_CUSTOMER_REPO';
 export const CREDIT_USER_REPO = 'CREDIT_USER_REPO';
 
@@ -72,3 +73,12 @@ export const GST_NUMBER_REGEX =
   /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]{2}[0-9A-Z]$/;
 
 export const BILL_TO = 'Locofast Online Private Limited';
+
+export const INVOICING_ROOT_REPO= 'INVOICING_ROOT_REPO';
+export const INVOICING_USER_REPO= 'INVOICING_USER_REPO';
+
+export const ROOT_USER_TYPES={
+  CREDIT_CUSTOMER: 21,
+  SUPPLIER :22
+}
+

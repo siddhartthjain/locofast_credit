@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
     table
       .bigInteger('order_id')
       .notNullable()
+      .unsigned()
       .references('id')
       .inTable('fabric_orders');
     table

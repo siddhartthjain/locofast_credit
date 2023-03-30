@@ -1,20 +1,19 @@
-import { BaseModel } from '@libs/core';
+import { BaseModel } from "@libs/core";
 
-export class User extends BaseModel {
-  static tableName = 'users';
+
+
+export class InvoicingUser extends BaseModel {
+  static tableName = 'Invoicing_users';
   // static modifiers = {
   //   defaultSelects(query) {
-  //     query.select('users.id', 'users.name');
+  //     query.select('credit_users.id as userId', 'name', 'role');
   //   },
   //   selectEmail(query) {
-  //     query.select('email');
+  //     query.select('id', 'first_name', 'name', 'email', 'isEnabled');
   //   },
   //   selectPhone(query) {
   //     query.select('calling_code', 'phone');
-  //   },
-  //   selectRole(query) {
-  //     query.select('role');
-  //   },
+  //   }
   // };
 
   // static relationMappings = {
@@ -26,19 +25,21 @@ export class User extends BaseModel {
   //       to: 'locofastroot.id',
   //     },
   //   },
-
-  //   managerMapping: {
+  //   manager: {
   //     relation: BaseModel.HasOneThroughRelation,
-  //     modelClass: User,
+  //     modelClass: 'User',
   //     join: {
   //       from: 'users.id',
   //       through: {
   //         from: 'UserManager.userId',
+  //         filter: (builder) => builder.where({ 'UserManager.isDeleted': 0}),
   //         to: 'UserManager.managerId',
   //       },
   //       to: 'users.id',
   //     },
-  //     filter: (builder) => builder.where({ 'UserManager.isDeleted': 0 }),
   //   },
   // };
+
+  // email: string;
+  // name: string;
 }
