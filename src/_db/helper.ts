@@ -15,6 +15,6 @@ export function commonFields(knex: Knex, table) {
     .notNullable()
     .defaultTo(knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
 
-  table.bigInteger('created_by').unsigned().references('id').inTable('users');
-  table.bigInteger('modified_by').unsigned().references('id').inTable('users');
+  table.bigInteger('created_by').unsigned().references('id').inTable('invoicing_users');
+  table.bigInteger('modified_by').unsigned().references('id').inTable('invoicing_users');
 }

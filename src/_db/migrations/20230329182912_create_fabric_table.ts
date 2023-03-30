@@ -1,6 +1,7 @@
 import * as Knex from 'knex';
 import { commonFields, id } from '../helper';
 
+
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('fabrics', function (table) {
     id(table);
