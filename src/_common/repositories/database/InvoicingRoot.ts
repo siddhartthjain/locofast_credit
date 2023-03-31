@@ -1,11 +1,10 @@
 import { ROOT_USER_TYPES } from '@app/_common/constants';
 import { InvoicingRoot } from '@app/_common/models/InvoicingRoot';
 import { DatabaseRepository, InjectModel } from '@libs/core/db/';
-import { Injectable } from '@nestjs/common';
+
 import { raw } from 'objection';
 import { InvoicingRootContract } from '../contracts/InvoicingRoot';
 
-@Injectable()
 export class InvoicingRootRepository
   extends DatabaseRepository
   implements InvoicingRootContract
