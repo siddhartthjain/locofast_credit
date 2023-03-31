@@ -7,16 +7,18 @@ import { ValidationFailed } from '@libs/core';
 import { FabricService } from 'src/fabric/services';
 import {
   FABRIC_ORDER_DELIVERY_ADDRESS_REPOSITORY,
+  FABRIC_ORDER_META_DATA_REPOSITORY,
   FABRIC_ORDER_REPOSITORY,
 } from '../constants';
 import { FabricOrder } from '../models';
 import {
   FabricOrderContract,
   FabricOrderDeliveryAddressContract,
+  FabricOrderMetaDataContract,
 } from '../repositories';
-import { CreateProvisionalOrder } from '../validators';
+import { CreateProvisionalOrder, DeliveryAddress } from '../validators';
 import { BaseValidator } from '@libs/core/validator';
-import { BILL_TO } from '@app/_common';
+import { BILL_TO, getFormattedDateString } from '@app/_common';
 import { calculateCreditPrice, calculateOrderValue } from '../helpers';
 
 @Injectable()
@@ -26,6 +28,8 @@ export class ProvisionalOrderService {
     @Inject(FABRIC_ORDER_REPOSITORY) private fabricOrder: FabricOrderContract,
     @Inject(FABRIC_ORDER_DELIVERY_ADDRESS_REPOSITORY)
     private fabricOrderDeliveryAddress: FabricOrderDeliveryAddressContract,
+    @Inject(FABRIC_ORDER_META_DATA_REPOSITORY)
+    private fabricOrderMetaData: FabricOrderMetaDataContract,
     private fabricService: FabricService,
   ) {}
 
@@ -33,28 +37,30 @@ export class ProvisionalOrderService {
     inputs: Record<string, any>,
   ): Promise<Record<string, any>> {
     // will have user too in input
-    inputs.billTo = BILL_TO;
     const {
       fabricDetails,
       fabricOrderDeliveryDetails,
       fabricOrderDetails,
-      orderValue,
-      creditPrice,
+      fabricOrderMetadata,
     } = await this.createProvisionalOrderCustomValidator(inputs);
 
     let fabricOrder;
     const trx = await FabricOrder.startTransaction();
     try {
       const fabric = await this.fabricService.addFabric(fabricDetails, trx);
-      const orderDeliveryDetails = await this.fabricOrderDeliveryAddress
-        .query(trx)
-        .insert(fabricOrderDeliveryDetails);
       fabricOrder = await this.fabricOrder.query(trx).insert({
         ...fabricOrderDetails,
         fabric_id: fabric.id,
-        delivery_id: orderDeliveryDetails.id,
       });
-      await trx.commit();
+      await this.fabricOrderDeliveryAddress.query(trx).insert({
+        ...fabricOrderDeliveryDetails,
+        order_id: fabricOrder.id,
+      });
+      await this.fabricOrderMetaData.query(trx).insert({
+        ...fabricOrderMetadata,
+        order_id: fabricOrder.id,
+      });
+      await await trx.commit();
     } catch (error) {
       console.log('Error in creating Order: ', error);
       await trx.rollback();
@@ -71,22 +77,22 @@ export class ProvisionalOrderService {
       fabricName,
       fabricSpecification,
       hsnCode,
-      billTo,
-      estimatedDeliveryDate,
-      terms = '',
       supplierId,
       quantity,
       procurementPrice,
       unitId,
-      brandDeliveryAddressId,
+      deliveryDetails,
     } = inputs;
-
     await this.validator.fire(inputs, CreateProvisionalOrder);
+    await this.validator.fire(deliveryDetails, DeliveryAddress);
     // will be check from database
     const creditCharges = 2;
     const orderValue = calculateOrderValue(procurementPrice, quantity);
     const creditPrice = calculateCreditPrice(orderValue, creditCharges);
-
+    deliveryDetails.estimatedDeliveryDate = getFormattedDateString(
+      deliveryDetails.estimatedDeliveryDate,
+    );
+    deliveryDetails.billTo = BILL_TO;
     const fabricDetails = {
       brandId,
       fabricName,
@@ -95,12 +101,9 @@ export class ProvisionalOrderService {
     };
 
     const fabricOrderDeliveryDetails = {
-      billTo,
-      estimatedDeliveryDate,
-      terms,
-      brand_address_id: brandDeliveryAddressId,
-      created_by: 1,
-      modified_by: 1,
+      ...deliveryDetails,
+      created_by: 2,
+      modified_by: 2,
     };
 
     const fabricOrderDetails = {
@@ -110,15 +113,26 @@ export class ProvisionalOrderService {
       procurement_price: procurementPrice,
       unit_id: unitId,
       order_value: orderValue,
-      credit_price: creditPrice,
-      created_by: 1,
-      modified_by: 1,
+      created_by: 2,
+      modified_by: 2,
+    };
+
+    const fabricOrderMetadata = {
+      order_value: orderValue,
+      payable_amount: creditPrice,
+      // both will be calculated from the DB
+      credit_period: 30,
+      credit_charges: 2,
+      // will came from user
+      created_by: 2,
+      modified_by: 2,
     };
 
     return {
       fabricDetails,
       fabricOrderDeliveryDetails,
       fabricOrderDetails,
+      fabricOrderMetadata,
     };
   }
 }

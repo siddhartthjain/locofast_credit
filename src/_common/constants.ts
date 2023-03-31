@@ -3,7 +3,6 @@ export const LOCO_ADMIN_USER_ID_KEY = 'LocoAdminUserId';
 export const USER_REPOSITORY = 'USER_REPOSITORY';
 export const LF_ROOT_REPOSITORY = 'LF_ROOT_REPOSITORY';
 export const CURRENCY_REPOSITORY = 'CURRENCY_REPOSITORY';
-
 // Fabric ID
 export const GENERATED_ID_PREFIX = 'LFB-';
 export const GENERATED_ID_MIN_LENGTH = 4;
@@ -74,11 +73,10 @@ export const GST_NUMBER_REGEX =
 
 export const BILL_TO = 'Locofast Online Private Limited';
 
-export const INVOICING_ROOT_REPO= 'INVOICING_ROOT_REPO';
-export const INVOICING_USER_REPO= 'INVOICING_USER_REPO';
+export const INVOICING_ROOT_REPO = 'INVOICING_ROOT_REPO';
+export const INVOICING_USER_REPO = 'INVOICING_USER_REPO';
 
-export const ROOT_USER_TYPES={
+export const ROOT_USER_TYPES = {
   CREDIT_CUSTOMER: 21,
-  SUPPLIER :22
-}
-
+  SUPPLIER: 22,
+};

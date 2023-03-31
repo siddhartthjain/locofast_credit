@@ -27,18 +27,6 @@ export class CreateProvisionalOrder {
   hsnCode: string;
 
   @IsDefined()
-  @IsString()
-  billTo: string;
-
-  @IsDefined()
-  @IsString()
-  estimatedDeliveryDate: string;
-
-  @IsOptional()
-  @IsString()
-  terms: string;
-
-  @IsDefined()
   @IsNumber()
   supplierId: number;
 
@@ -53,8 +41,4 @@ export class CreateProvisionalOrder {
   @IsDefined()
   @IsNumber()
   unitId: number;
-
-  @IsDefined()
-  @IsNumber()
-  brandDeliveryAddressId: number;
 }
