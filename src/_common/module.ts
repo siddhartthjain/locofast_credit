@@ -26,6 +26,14 @@ import { CurrencyService, LfRootService, UserService } from './services';
     { provide: USER_REPOSITORY, useClass: UserRepository },
     { provide: LF_ROOT_REPOSITORY, useClass: LfRootRepository },
     { provide: CURRENCY_REPOSITORY, useClass: CurrencyRepository },
+    {
+      provide: INVOICING_ROOT_REPO,
+      useClass: InvoicingRootRepository,
+    },
+    {
+      provide: INVOICING_USER_REPO,
+      useClass: InvoicingUserRepository,
+    },
   ],
   exports: [
     UserService,
