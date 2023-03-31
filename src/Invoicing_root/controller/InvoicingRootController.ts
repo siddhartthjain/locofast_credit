@@ -15,7 +15,7 @@ export class InvoicingRootController {
   {
     const inputs = req.all();
     const user = req.user;
-    return await this.InvoicingCustomerService.createInvoicingCustomer(inputs, user);
+    return await this.InvoicingCustomerService.createInvoicingRoot(inputs, user);
   }
 
 

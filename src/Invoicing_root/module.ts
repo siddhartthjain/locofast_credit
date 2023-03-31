@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { CreditRootService } from './service/InvoicingRootService';
-import { CreditRootController } from './controller/InvoicingRootController';
+import { InvoicingRootService } from './service/InvoicingRootService';
+import { InvoicingRootController } from './controller/InvoicingRootController';
 
 import { CREDIT_CUSTOMER_DETAILS_REPOSITORY } from './constants';
 
@@ -9,7 +9,7 @@ import { CoreModule } from '@libs/core';
 
 @Module({
   imports: [CommonModule, CoreModule],
-  providers: [CreditRootService],
-  controllers: [CreditRootController],
+  providers: [InvoicingRootService],
+  controllers: [InvoicingRootController],
 })
 export class CreditCustomerModule {}
