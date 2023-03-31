@@ -22,8 +22,8 @@ export class FabricService {
       fabric_name: fabricName,
       fabric_specification: fabricSpecification,
       hsn_code: hsnCode,
-      created_by: 1342,
-      modified_by: 1342,
+      created_by: 2,
+      modified_by: 2,
     });
     const generatedFabricId = composeGeneratedFabricID(Fabric.id);
     await this.fabric

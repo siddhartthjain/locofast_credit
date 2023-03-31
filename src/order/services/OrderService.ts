@@ -1,9 +1,11 @@
+import { getFormattedDateString } from '@app/_common';
 import {
   Inject,
   Injectable,
   InternalServerErrorException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import moment from 'moment';
 import { FabricContract } from 'src/fabric';
 import {
   FABRIC_ORDER_DELIVERY_ADDRESS_REPOSITORY,
@@ -74,14 +76,17 @@ export class OrderService {
   async dispatchOrderCustomValidator(
     inputs: Record<string, any>,
   ): Promise<Record<string, any>> {
-    const { orderId, quantity, dispatchDate } = inputs;
-    const fabricOrder = await this.fabricOrder.firstWhere({ id: orderId });
-    if (!checkQuantity(fabricOrder.quantity, quantity)) {
+    const { user, resource } = inputs;
+    const fabricOrder = await this.fabricOrder.firstWhere({
+      id: resource.orderId,
+    });
+    if (!checkQuantity(fabricOrder.quantity, resource.quantity)) {
       throw new UnprocessableEntityException('This is not the order quantity');
     }
+    resource.dispatchDate = getFormattedDateString(resource.dispatchDate);
     const dispatchDetails = {
-      quantity,
-      dispatch_date: dispatchDate,
+      quantity: resource.quantity,
+      dispatch_date: resource.dispatchDate,
     };
     return { dispatchDetails };
   }

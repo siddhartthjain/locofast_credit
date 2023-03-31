@@ -30,8 +30,6 @@ export async function up(knex: Knex): Promise<void> {
     table.decimal('procurement_price', 12, 2).notNullable();
     // price we will pay to the supplier
     table.decimal('order_value', 12, 2).notNullable();
-    // price after interest (paid by customer)
-    table.decimal('credit_price', 12, 2).notNullable();
     table
       .bigInteger('marked_delivered_by')
       .unsigned()

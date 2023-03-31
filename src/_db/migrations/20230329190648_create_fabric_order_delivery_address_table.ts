@@ -24,7 +24,7 @@ export async function up(knex: Knex): Promise<void> {
       table.integer('pin_code').unsigned();
       table.boolean('is_international').defaultTo(false);
       table.timestamp('estimated_delivery_date').notNullable();
-      table.string('terms');
+      table.string('terms').defaultTo('');
       commonFields(knex, table);
     },
   );
