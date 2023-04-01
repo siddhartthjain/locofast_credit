@@ -3,7 +3,6 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ValidationFailed } from '@libs/core';
 import { FabricService } from 'src/fabric/services';
 import {
   FABRIC_ORDER_DELIVERY_ADDRESS_REPOSITORY,
