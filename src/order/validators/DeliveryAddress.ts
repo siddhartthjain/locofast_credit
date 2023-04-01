@@ -15,10 +15,6 @@ export class DeliveryAddress {
 
   @IsDefined()
   @IsString()
-  billTo: string;
-
-  @IsDefined()
-  @IsString()
   @MinLength(1)
   @MaxLength(20)
   phone: string;

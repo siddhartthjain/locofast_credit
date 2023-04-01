@@ -28,10 +28,10 @@ export class SupplierService {
     // require user table for this
     const { gstNumber, firstName, lastName, contactNumber, email } = inputs;
     const supplierDetails = {
-      gst_number: gstNumber,
-      first_name: firstName,
-      last_name: lastName,
-      contact_number: contactNumber,
+      gstNumber,
+      firstName,
+      lastName,
+      contactNumber,
       email,
       // will be changed to user.id
       created_by: 1,
