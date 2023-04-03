@@ -14,4 +14,13 @@ export const ORDER_STATUS = {
   CANCELLED: 5,
 };
 
+export const ORDER_TABS = {
+  ALL_ORDERS: '1',
+  VERIFICATION_PENDING: '2',
+  PO_RAISED: '3',
+  DELIVERED: '4',
+  PRODUCTION: '5',
+};
+
 export const VARIABLE_QUANTITY = 5;
+export const DATA_LIMIT = 5;
