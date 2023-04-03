@@ -75,6 +75,7 @@ export const BILL_TO = 'Locofast Online Private Limited';
 
 export const INVOICING_ROOT_REPO = 'INVOICING_ROOT_REPO';
 export const INVOICING_USER_REPO = 'INVOICING_USER_REPO';
+export const CREDIT_INFO_REPO = 'CREDIT_INFO_REPO';
 
 export const ROOT_USER_TYPES = {
   CREDIT_CUSTOMER: 21,

@@ -8,6 +8,7 @@ import { SupplierModule } from './supplier/module';
 import { FabricModule } from './fabric';
 import { CommonModule } from './_common';
 import { CoreModule } from '@libs/core';
+import { InvoicingRootModule } from './Invoicing_root/module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CoreModule } from '@libs/core';
     SupplierModule,
     FabricModule,
     CoreModule,
+    InvoicingRootModule
   ],
   controllers: [],
   providers: [],

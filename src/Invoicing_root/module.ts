@@ -12,4 +12,4 @@ import { CoreModule } from '@libs/core';
   providers: [InvoicingRootService],
   controllers: [InvoicingRootController],
 })
-export class CreditCustomerModule {}
+export class InvoicingRootModule {}

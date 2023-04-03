@@ -4,8 +4,9 @@ import { Response } from '@libs/core';;
 import { BaseValidator } from '@libs/core/validator';
 import { InvoicingCustomerValidator } from '../validators/InvoicingCustomerValidator';
 import * as crypto from "crypto";
-import { InvoicingRootContract, InvoicingUserContract, INVOICING_ROOT_REPO, INVOICING_USER_REPO, ROOT_USER_TYPES } from '@app/_common';
+import { CREDIT_INFO_REPO, InvoicingRootContract, InvoicingUserContract, INVOICING_ROOT_REPO, INVOICING_USER_REPO, ROOT_USER_TYPES } from '@app/_common';
 import { InvoicingRoot } from '@app/_common/models/InvoicingRoot';
+import { CreditInfoContract } from '@app/_common/repositories/contracts/CreditInfo';
 
 
 
@@ -19,42 +20,45 @@ export class InvoicingRootService {
     @Inject(INVOICING_ROOT_REPO)
     private InvoicingRootRepo : InvoicingRootContract,
 
+    @Inject(CREDIT_INFO_REPO)
+    private CreditInfoRepo : CreditInfoContract
+
   ) {}
 
   
 
   async createInvoicingRoot(inputs :Record<string,any>, user: Record<string,any> ) {
     const {
+
       user_id, 
       brand_id,  
       first_name,
       last_name = '',
-      is_Invoicing_available = 1,
-      Invoicing_period = 30,
-      Invoicing_charges = 2,
+      name ,
+      is_active = 1,
+      credit_charges = 2,
+      GST,
+      phone_no,
+      credit,
+
     } = inputs;
 
     await this.validator.fire(inputs, InvoicingCustomerValidator);
-    
-    const financeManager = user.id;
+    const trx = await InvoicingRoot.startTransaction(); 
+    const financeManager = 1;
     const brandSecretKey = crypto.randomBytes(16).toString('hex');
     const userSecretKey = crypto.randomBytes(16).toString('hex');
-
-   
-    // newCustomer ={user_id, brand_id, first_name,last_name, is_Invoicing_available, Invoicing_period, Invoicing_charges} 
-    const trx = await InvoicingRoot.startTransaction();
-
-    try {
-      
+    const brandtype = ROOT_USER_TYPES.CREDIT_CUSTOMER;
+    try
+    {
       const result = await this.InvoicingRootRepo.query(trx).insert({
         
         brand_id,
-        first_name,
-        last_name,
-        is_Invoicing_available,
-        Invoicing_period,
-        Invoicing_charges,
-        brandSecretKey,
+        name,
+        brandtype,
+        gst :GST,
+        secret_key:brandSecretKey,
+        is_active,
         created_by: financeManager,
         modified_by: financeManager
 
@@ -64,18 +68,30 @@ export class InvoicingRootService {
       const result2= await this.InvoicingUserRepo.query(trx).insert({
         user_id,
         brand_id,
-        Root_id:InvoicingRootId,
+        root_id:InvoicingRootId,
         first_name,
         last_name,
+        phone_no,
         userSecretKey,
         created_by:financeManager,
         modified_by: financeManager
       })
-     await trx.commit();
+       
+      const result3= await this.CreditInfoRepo.query(trx).insert({
+        customer_id: InvoicingRootId,
+        credit,
+        is_credit_available:1,
+        credit_charges
+        
+      })
 
-    } catch (error) {
+        await trx.commit();
+    }
+     catch (error) {
+
       console.error('Error in creating customer via self-onbaording: ', error);
       await trx.rollback();
+      
       throw new InternalServerErrorException('Something went wrong');
     }
   }
@@ -111,3 +127,7 @@ export class InvoicingRootService {
     return;
   }
 }
+function getPaymentInfo(inputs: any) {
+  throw new Error('Function not implemented.');
+}
+
