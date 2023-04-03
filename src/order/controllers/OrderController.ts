@@ -1,10 +1,27 @@
 import { Request, Response } from '@libs/core';
-import { Controller, Post, Req, Res, Patch } from '@nestjs/common';
+import { Controller, Post, Req, Res, Patch, Get } from '@nestjs/common';
 import { OrderService } from '../services';
 
 @Controller('orders')
 export class OrderController {
   constructor(private orderServcie: OrderService) {}
+
+  @Get()
+  async getOrder(@Req() req: Request, @Res() res: Response): Promise<Response> {
+    const inputs = req.all();
+
+    const data = await this.orderServcie.getOrders(inputs);
+    return res.success(data);
+  }
+
+  @Get('/active-orders')
+  async getActiveOrders(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    const data = await this.orderServcie.getActiveOrders();
+    return res.success(data);
+  }
 
   @Patch(':orderId/raise-po')
   async raisePO(@Req() req: Request, @Res() res: Response): Promise<Response> {

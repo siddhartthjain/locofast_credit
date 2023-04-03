@@ -15,18 +15,46 @@ import {
 } from '../constants';
 import { checkQuantity } from '../helpers';
 import { FabricOrder } from '../models';
-import { FabricOrderDispatchContract } from '../repositories';
+import {
+  FabricOrderContract,
+  FabricOrderDispatchContract,
+} from '../repositories';
 import { BaseValidator } from '@libs/core/validator';
 import { DeliveredOrder } from '../validators/DeliveredOrder';
+import { GetOrders } from '../interfaces';
 
 @Injectable()
 export class OrderService {
   constructor(
-    @Inject(FABRIC_ORDER_REPOSITORY) private fabricOrder: FabricContract,
+    @Inject(FABRIC_ORDER_REPOSITORY) private fabricOrder: FabricOrderContract,
     @Inject(FABRIC_ORDER_DISPATCH_REPOSITORY)
     private fabricOrderDispatch: FabricOrderDispatchContract,
     private validator: BaseValidator,
   ) {}
+
+  async getOrders(inputs: Record<string, any>) {
+    const { orderTab, limit, sortOrder, pageNo } = inputs;
+    const user = {
+      role: '21',
+      orgId: 3,
+    };
+    return this.fabricOrder.getOrders({
+      orderTab,
+      limit,
+      sortOrder,
+      user,
+      pageNo,
+    });
+  }
+
+  async getActiveOrders() {
+    const user = {
+      role: '21',
+      orgId: 3,
+    };
+    const data = await this.fabricOrder.getActiveOrders(user);
+    return data;
+  }
 
   async raisePo(inputs: Record<string, any>) {
     const { orderId } = inputs;
