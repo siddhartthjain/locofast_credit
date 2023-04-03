@@ -13,11 +13,12 @@ export async function up(knex: Knex): Promise<void> {
        .inTable('invoicing_root');
        table.integer('credit').notNullable().defaultTo(2);
        table.integer('is_credit_available').notNullable().defaultTo(1);
-       table.integer('credit_period').notNullable(); 
+       table.integer('credit_period')
     })
 }
 
 
 export async function down(knex: Knex): Promise<void> {
+    return knex.schema.dropTableIfExists('credit_info');
 }
 

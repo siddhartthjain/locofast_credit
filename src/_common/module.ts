@@ -5,6 +5,7 @@ import {
   CURRENCY_REPOSITORY,
   LF_ROOT_REPOSITORY,
   USER_REPOSITORY,
+  CREDIT_INFO_REPO,
 } from './constants';
 import { CommonController } from './controllers';
 import {
@@ -12,6 +13,7 @@ import {
   LfRootRepository,
   UserRepository,
 } from './repositories';
+import { CreditInfoRepo } from './repositories/database/CreditInfo';
 import { InvoicingRootRepository } from './repositories/database/InvoicingRoot';
 import { InvoicingUserRepository } from './repositories/database/Users';
 import { CurrencyService, LfRootService, UserService } from './services';
@@ -34,6 +36,10 @@ import { CurrencyService, LfRootService, UserService } from './services';
       provide: INVOICING_USER_REPO,
       useClass: InvoicingUserRepository,
     },
+    {
+      provide: CREDIT_INFO_REPO,
+      useClass: CreditInfoRepo,
+    },
   ],
   exports: [
     UserService,
@@ -49,6 +55,10 @@ import { CurrencyService, LfRootService, UserService } from './services';
     {
       provide: INVOICING_USER_REPO,
       useClass: InvoicingUserRepository,
+    },
+    {
+      provide: CREDIT_INFO_REPO,
+      useClass: CreditInfoRepo,
     },
   ],
 })
