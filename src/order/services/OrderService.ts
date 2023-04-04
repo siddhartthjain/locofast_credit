@@ -36,7 +36,7 @@ export class OrderService {
     const { orderTab, limit, sortOrder, pageNo } = inputs;
     const user = {
       role: '21',
-      orgId: 3,
+      orgId: 2,
     };
     return this.fabricOrder.getOrders({
       orderTab,
@@ -50,7 +50,7 @@ export class OrderService {
   async getActiveOrders() {
     const user = {
       role: '21',
-      orgId: 3,
+      orgId: 2,
     };
     const data = await this.fabricOrder.getActiveOrders(user);
     return data;
@@ -137,6 +137,16 @@ export class OrderService {
       throw new InternalServerErrorException('Something went wrong');
     }
     return;
+  }
+
+  async getOrderDetails(inputs: Record<string, any>) {
+    const user = {
+      role: '21',
+      orgId: 2,
+    };
+    inputs.user = user;
+    const data = await this.fabricOrder.getOrderDetails(inputs);
+    return data;
   }
 
   async dispatchOrderCustomValidator(

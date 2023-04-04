@@ -81,3 +81,5 @@ export const ROOT_USER_TYPES = {
   CREDIT_CUSTOMER: '21',
   SUPPLIER: '22',
 };
+
+export const GST = 5;
