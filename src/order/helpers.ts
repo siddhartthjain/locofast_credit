@@ -1,3 +1,4 @@
+import { GST } from '@app/_common';
 import { ORDER_STATUS, ORDER_TABS, VARIABLE_QUANTITY } from './constants';
 import { GetOrders } from './interfaces';
 
@@ -14,7 +15,8 @@ export const calculateOrderValue = (
   quantity: number,
 ) => {
   const price = procurementPrice * quantity;
-  return price;
+  const finalPrice = price + (price * GST) / 100;
+  return finalPrice;
 };
 
 export const checkQuantity = (

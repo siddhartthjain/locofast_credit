@@ -23,6 +23,16 @@ export class OrderController {
     return res.success(data);
   }
 
+  @Get(':orderId')
+  async getOrderDetails(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    const inputs = req.all();
+    const data = await this.orderServcie.getOrderDetails(inputs);
+    return res.success(data);
+  }
+
   @Patch(':orderId/raise-po')
   async raisePO(@Req() req: Request, @Res() res: Response): Promise<Response> {
     // May be we will have performa invoice here too

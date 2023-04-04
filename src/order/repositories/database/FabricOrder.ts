@@ -7,6 +7,7 @@ import { FabricOrderContract } from '../contracts';
 import { activeOrders, orderStatus } from '@app/order/helpers';
 import { ROOT_USER_TYPES } from '@app/_common';
 import get from 'lodash';
+import { raw } from 'objection';
 @Injectable()
 export class FabricOrderRepository extends DB implements FabricOrderContract {
   @InjectModel(FabricOrder)
@@ -33,7 +34,7 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
         'fo.quantity',
         'u.short_name as unit',
         'f.fabric_specification',
-        'fo.order_value as amount',
+        'fomd.payable_amount as amount',
         'foda.estimated_delivery_date',
         'fo.status',
       ];
@@ -80,6 +81,7 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
     } else if (user.role === ROOT_USER_TYPES.CREDIT_CUSTOMER) {
       query
         .innerJoin('invoicing_root as ivroot', 'ivroot.id', 'fo.supplier_id')
+        .innerJoin('fabric_order_meta_data as fomd', 'fomd.order_id', 'fo.id')
         .where('fo.customer_id', user.orgId);
     }
 
@@ -119,18 +121,50 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
 
     let readyOrder = await this.query()
       .alias('fo')
-      .select('f.fabric_name', 'ivroot.name as orgName')
+      .select('fo.id as order_id', 'f.fabric_name', 'ivroot.name as orgName')
       .innerJoin('invoicing_root as ivroot', 'ivroot.id', 'fo.supplier_id')
       .innerJoin('fabrics as f', 'f.id', 'fo.fabric_id')
       .innerJoin('fabric_order_dispatch as fod', 'fo.id', 'fod.order_id')
       .where('fo.status', ORDER_STATUS.DISPATCHED)
       .andWhere('fo.customer_id', orgId)
-      .orderBy('fod.created_on', 'desc')
-      .limit(1)
-      .first();
+      .orderBy('fod.created_on', 'desc');
 
     data.readyOrder = readyOrder;
 
     return { data };
+  }
+
+  async getOrderDetails(
+    inputs: Record<string, any>,
+  ): Promise<Record<string, any>> {
+    //  console.log(inputs);
+    //will have porforma invoice file too
+    const { orderId, user } = inputs;
+
+    const query = this.query()
+      .alias('fo')
+      .select(
+        'fo.procurement_price',
+        'fo.quantity',
+        'fo.order_value',
+        'fo.id as orderId',
+        'fo.status',
+      )
+      .where('fo.id', orderId);
+
+    let graphQuery = '';
+    if (user.role === ROOT_USER_TYPES.CREDIT_CUSTOMER) {
+      graphQuery =
+        '[fabric(fabricDetails) , supplier(suplierDetails) , payment(paymentDetails) , delivery(deliveryDetails)]';
+    } else if (user.role === ROOT_USER_TYPES.SUPPLIER) {
+      graphQuery =
+        '[fabric(fabricDetails) , supplier(suplierDetails) , delivery(deliveryDetails)]';
+      query.select('fo.created_on as orderDate');
+    }
+
+    query.withGraphJoined(graphQuery);
+
+    const orderDetails = await query;
+    return orderDetails;
   }
 }
