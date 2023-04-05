@@ -1,4 +1,7 @@
+import { HttpModule, HttpService } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
 import {
   INVOICING_ROOT_REPO,
   INVOICING_USER_REPO,
@@ -17,14 +20,18 @@ import { CreditInfoRepo } from './repositories/database/CreditInfo';
 import { InvoicingRootRepository } from './repositories/database/InvoicingRoot';
 import { InvoicingUserRepository } from './repositories/database/Users';
 import { CurrencyService, LfRootService, UserService } from './services';
+import { CommonService } from './services/Commonservice';
 
 @Module({
-  controllers: [CommonController],
-  imports: [],
+  controllers: [CommonController,],
+  imports: [ HttpModule,],
   providers: [
     UserService,
     LfRootService,
     CurrencyService,
+    ConfigService,
+    
+    CommonService,
     { provide: USER_REPOSITORY, useClass: UserRepository },
     { provide: LF_ROOT_REPOSITORY, useClass: LfRootRepository },
     { provide: CURRENCY_REPOSITORY, useClass: CurrencyRepository },
@@ -45,6 +52,9 @@ import { CurrencyService, LfRootService, UserService } from './services';
     UserService,
     LfRootService,
     CurrencyService,
+    ConfigService,
+    
+    CommonService,
     { provide: USER_REPOSITORY, useClass: UserRepository },
     { provide: LF_ROOT_REPOSITORY, useClass: LfRootRepository },
     { provide: CURRENCY_REPOSITORY, useClass: CurrencyRepository },

@@ -11,11 +11,12 @@ export class InvoicingRootController {
   async createRoot(
     @Req() req :Request,
     @Res() res :Response
-  ):Promise<any>
+  ):Promise<Response>
   {
     const inputs = req.all();
     const user = req.user;
-    return await this.InvoicingCustomerService.createInvoicingRoot(inputs, user);
+    const data =await this.InvoicingCustomerService.createInvoicingRoot(inputs, user);
+    return res.success(data);
   }
 
 
@@ -29,4 +30,5 @@ export class InvoicingRootController {
 
     return this.InvoicingCustomerService.get(inputs, user);
   }
+  
 }
