@@ -59,7 +59,7 @@ export class ProvisionalOrderService {
         ...fabricOrderMetadata,
         order_id: fabricOrder.id,
       });
-      await await trx.commit();
+      await trx.commit();
     } catch (error) {
       console.log('Error in creating Order: ', error);
       await trx.rollback();

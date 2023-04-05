@@ -1,3 +1,5 @@
+//not in use
+/*
 import * as Knex from 'knex';
 import { commonFields, id } from '../helper';
 
@@ -15,4 +17,4 @@ export async function up(knex: Knex): Promise<void> {
 
 export async function down(knex: Knex): Promise<void> {
   return knex.schema.dropTableIfExists('suppliers');
-}
+}*/

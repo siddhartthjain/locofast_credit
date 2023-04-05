@@ -82,4 +82,7 @@ export const ROOT_USER_TYPES = {
   SUPPLIER: '22',
 };
 
+export const FABRIC_CUSTOMER_ORG_ROLE = '11';
+export const FABRIC_SUPPLIER_ORG_ROLE = '12';
+
 export const GST = 5;
