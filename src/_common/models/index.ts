@@ -5,3 +5,6 @@ export * from './Currency';
 export * from './UserManager';
 export * from './Locofastroot';
 export * from './UserOrg';
+export * from './GstNumberDetails';
+export * from './InvoicingRoot';
+export * from './InvoicingUsers';

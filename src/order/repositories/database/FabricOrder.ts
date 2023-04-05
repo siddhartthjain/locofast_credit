@@ -154,11 +154,9 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
 
     let graphQuery = '';
     if (user.role === ROOT_USER_TYPES.CREDIT_CUSTOMER) {
-      graphQuery =
-        '[fabric(fabricDetails) , supplier(suplierDetails) , payment(paymentDetails) , delivery(deliveryDetails)]';
+      graphQuery = `[fabric(fabricDetails) , supplier(suplierDetails) , payment(paymentDetails) , delivery(deliveryDetails) ,unit(unitsDetails)]`;
     } else if (user.role === ROOT_USER_TYPES.SUPPLIER) {
-      graphQuery =
-        '[fabric(fabricDetails) , supplier(suplierDetails) , delivery(deliveryDetails)]';
+      graphQuery = `[fabric(fabricDetails) , supplier(suplierDetails) , delivery(deliveryDetails),unit(unitsDetails)]`;
       query.select('fo.created_on as orderDate');
     }
 

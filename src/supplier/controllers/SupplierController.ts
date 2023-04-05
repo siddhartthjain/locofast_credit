@@ -11,7 +11,7 @@ export class SupplierController {
     @Res() res: Response,
   ): Promise<Response> {
     const inputs = req.all();
-    const data = await this.supplierService.addSupplier(inputs);
-    return res.success(data);
+    await this.supplierService.addSupplier(inputs);
+    return res.noContent();
   }
 }

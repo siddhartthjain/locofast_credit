@@ -9,7 +9,6 @@ export class OrderController {
   @Get()
   async getOrder(@Req() req: Request, @Res() res: Response): Promise<Response> {
     const inputs = req.all();
-
     const data = await this.orderServcie.getOrders(inputs);
     return res.success(data);
   }
