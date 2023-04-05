@@ -4,9 +4,10 @@ import { Response } from '@libs/core';;
 import { BaseValidator } from '@libs/core/validator';
 import { InvoicingCustomerValidator } from '../validators/InvoicingCustomerValidator';
 import * as crypto from "crypto";
-import { CREDIT_INFO_REPO, InvoicingRootContract, InvoicingUserContract, INVOICING_ROOT_REPO, INVOICING_USER_REPO, ROOT_USER_TYPES } from '@app/_common';
+import { BRAND_TYPE, CREDIT_INFO_REPO, InvoicingRootContract, InvoicingUserContract, INVOICING_ROOT_REPO, INVOICING_USER_REPO, ROOT_USER_TYPES } from '@app/_common';
 import { InvoicingRoot } from '@app/_common/models/InvoicingRoot';
 import { CreditInfoContract } from '@app/_common/repositories/contracts/CreditInfo';
+import { CommonService } from '@app/_common/services/Commonservice';
 
 
 
@@ -21,24 +22,26 @@ export class InvoicingRootService {
     private InvoicingRootRepo : InvoicingRootContract,
 
     @Inject(CREDIT_INFO_REPO)
-    private CreditInfoRepo : CreditInfoContract
+    private CreditInfoRepo : CreditInfoContract,
+    private commonService : CommonService
 
   ) {}
 
   
 
-  async createInvoicingRoot(inputs :Record<string,any>, user: Record<string,any> ) {
+  async createInvoicingRoot(inputs :Record<string,any>, user: Record<string,any> ): Promise<Record<string, any>>{
     const {
 
-      user_id, 
-      brand_id,  
-      first_name,
-      last_name = '',
+      userId, 
+      brandId,  
+      firstName,
+      lastName = '',
       name ,
-      is_active = 1,
-      credit_charges = 2,
-      GST,
-      phone_no,
+     
+      isActive = 1,
+      creditCharges = 2,
+      gst,
+      phoneNo,
       credit,
 
     } = inputs;
@@ -48,44 +51,50 @@ export class InvoicingRootService {
     const financeManager = 1;
     const brandSecretKey = crypto.randomBytes(16).toString('hex');
     const userSecretKey = crypto.randomBytes(16).toString('hex');
-    const brandtype = ROOT_USER_TYPES.CREDIT_CUSTOMER;
+    const brandtype = BRAND_TYPE.CUSTOMER;
+    const role =ROOT_USER_TYPES.CREDIT_CUSTOMER;
+   
+    const res= await this.commonService.getCustomerdata(brandId);
+
+    console.log(res);
     try
     {
       const result = await this.InvoicingRootRepo.query(trx).insert({
         
-        brand_id,
+        brandId,
         name,
         brandtype,
-        gst :GST,
-        secret_key:brandSecretKey,
-        is_active,
-        created_by: financeManager,
-        modified_by: financeManager
+        gst ,
+        secretKey:brandSecretKey,
+        isActive,
+        createdBy: financeManager,
+        modifiedBy: financeManager
 
       });
 
       const InvoicingRootId= result.id;
-      const result2= await this.InvoicingUserRepo.query(trx).insert({
-        user_id,
-        brand_id,
-        root_id:InvoicingRootId,
-        first_name,
-        last_name,
-        phone_no,
+       await this.InvoicingUserRepo.query(trx).insert({
+        userId,
+        brandId,
+        rootId:InvoicingRootId,
+        firstName,
+        lastName,
+        role,
+        phoneNo,
         userSecretKey,
-        created_by:financeManager,
-        modified_by: financeManager
+        createdBy:financeManager,
+        modifiedBy: financeManager
       })
        
       const result3= await this.CreditInfoRepo.query(trx).insert({
         customer_id: InvoicingRootId,
         credit,
         is_credit_available:1,
-        credit_charges
-        
+        creditCharges
       })
 
         await trx.commit();
+        return result;
     }
      catch (error) {
 

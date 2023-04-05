@@ -40,7 +40,7 @@ async function bootstrap() {
   // interceptors
   //  app.useGlobalInterceptors(new TimeoutInterceptor());
 
-  //await app.listen(config.get('app.port'));
+  // await app.listen(config.get('app.port'));
   await app.listen(3000);
 }
 

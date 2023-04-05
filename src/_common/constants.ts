@@ -82,4 +82,10 @@ export const ROOT_USER_TYPES = {
   SUPPLIER: '22',
 };
 
+export const BRAND_TYPE =
+{
+  CUSTOMER: '11',
+  SUPPLIER: '10'
+}
+
 export const GST = 5;

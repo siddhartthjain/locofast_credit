@@ -9,6 +9,7 @@ import { FabricModule } from './fabric';
 import { CommonModule } from './_common';
 import { CoreModule } from '@libs/core';
 import { InvoicingRootModule } from './Invoicing_root/module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { InvoicingRootModule } from './Invoicing_root/module';
     SupplierModule,
     FabricModule,
     CoreModule,
-    InvoicingRootModule
+    InvoicingRootModule,
+    HttpModule
   ],
   controllers: [],
   providers: [],
