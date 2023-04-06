@@ -17,10 +17,11 @@ import {
 import { FabricOrderDeliveryAddressRepository } from './repositories/database/FabricOrderDeliveryAddress';
 import { OrderService } from './services/OrderService';
 import { ProvisionalOrderService } from './services/ProvisionalOrderService';
+import { CommonModule } from '@app/_common';
 
 @Module({
   controllers: [OrderController, ProvisionalOrderController],
-  imports: [FabricModule, CoreModule],
+  imports: [FabricModule, CoreModule, CommonModule],
   providers: [
     OrderService,
     ProvisionalOrderService,

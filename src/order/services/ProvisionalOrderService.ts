@@ -17,7 +17,12 @@ import {
 } from '../repositories';
 import { CreateProvisionalOrder, DeliveryAddress } from '../validators';
 import { BaseValidator } from '@libs/core/validator';
-import { BILL_TO, getFormattedDateString } from '@app/_common';
+import {
+  BILL_TO,
+  CREDIT_INFO_REPO,
+  CreditInfoContract,
+  getFormattedDateString,
+} from '@app/_common';
 import { calculateCreditPrice, calculateOrderValue } from '../helpers';
 
 @Injectable()
@@ -30,6 +35,7 @@ export class ProvisionalOrderService {
     @Inject(FABRIC_ORDER_META_DATA_REPOSITORY)
     private fabricOrderMetaData: FabricOrderMetaDataContract,
     private fabricService: FabricService,
+    @Inject(CREDIT_INFO_REPO) private creditInfo: CreditInfoContract,
   ) {}
 
   async createProvisionalOrder(
@@ -84,7 +90,14 @@ export class ProvisionalOrderService {
     } = inputs;
     await this.validator.fire(inputs, CreateProvisionalOrder);
     await this.validator.fire(deliveryDetails, DeliveryAddress);
-    // will be check from database
+    const user = {
+      role: '21',
+      oid: 2,
+    };
+    /*  const customerCreditInfo = await this.creditInfo.firstWhere({
+      customerId: user.oid,
+    });
+    const {creditCharges , creditPeriod} = customerCreditInfo*/
     const creditCharges = 2;
     const orderValue = calculateOrderValue(procurementPrice, quantity);
     const creditPrice = calculateCreditPrice(orderValue, creditCharges);

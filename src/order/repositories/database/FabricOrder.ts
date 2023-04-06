@@ -15,6 +15,7 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
 
   async getOrders(inputs: GetOrders): Promise<Record<string, any>> {
     const { limit, pageNo, orderTab, sortOrder, user } = inputs;
+
     let statusArray = orderStatus(inputs);
     let sortBy = '';
     if (orderTab === ORDER_TABS.DELIVERED) {
@@ -22,8 +23,7 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
     } else {
       sortBy = 'fo.created_on';
     }
-    // need to add mill address and gst information table
-    // for mill address (Dispatched Order Case)
+
     let selectAble = [];
     if (user.role === ROOT_USER_TYPES.CREDIT_CUSTOMER) {
       selectAble = [
@@ -37,6 +37,7 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
         'fomd.payable_amount as amount',
         'foda.estimated_delivery_date',
         'fo.status',
+        'fsa.location as supplierLocation',
       ];
     } else if (user.role === ROOT_USER_TYPES.SUPPLIER) {
       selectAble = [
@@ -50,6 +51,7 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
         'fo.order_value as amount',
         'foda.estimated_delivery_date',
         'fo.status',
+        'fsa.location as supplierLocation',
       ];
     }
 
@@ -66,6 +68,11 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
         'fo.id',
       )
       .innerJoin('units as u', 'fo.unit_id', 'u.id')
+      .leftJoin(
+        'fabric_supplier_address as fsa',
+        'fsa.supplier_id',
+        'fo.supplier_id',
+      )
       .whereIn('fo.status', statusArray).orderByRaw(`
         CASE fo.status
           WHEN 3 THEN 1
@@ -149,6 +156,7 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
         'fo.order_value',
         'fo.id as orderId',
         'fo.status',
+        'fo.order_confirmed_on as orderPlacedDate',
       )
       .where('fo.id', orderId);
 
@@ -157,7 +165,6 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
       graphQuery = `[fabric(fabricDetails) , supplier(suplierDetails) , payment(paymentDetails) , delivery(deliveryDetails) ,unit(unitsDetails)]`;
     } else if (user.role === ROOT_USER_TYPES.SUPPLIER) {
       graphQuery = `[fabric(fabricDetails) , supplier(suplierDetails) , delivery(deliveryDetails),unit(unitsDetails)]`;
-      query.select('fo.created_on as orderDate');
     }
 
     query.withGraphJoined(graphQuery);

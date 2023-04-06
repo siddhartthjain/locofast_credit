@@ -4,3 +4,4 @@ export * from './Currency';
 export * from './InvoicingRoot';
 export * from './InvoincingUsers';
 export * from './GstNumberDetails';
+export * from './CreditInfo';

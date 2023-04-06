@@ -62,6 +62,11 @@ export class SupplierService {
     }
   }
 
+  async searchSuppliers(inputs: Record<string, any>) {
+    const suppliers = await this.invoicingRoot.searchSuppliers(inputs);
+    return suppliers;
+  }
+
   async _createSupplierCustomValidation(
     inputs: Record<string, any>,
   ): Promise<Record<string, any>> {
