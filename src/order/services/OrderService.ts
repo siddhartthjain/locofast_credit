@@ -58,10 +58,12 @@ export class OrderService {
 
   async raisePo(inputs: Record<string, any>) {
     const { orderId } = inputs;
+    const order_confirmed_on = getFormattedDateString(new Date().toISOString());
     await this.fabricOrder
       .query()
       .patch({
         status: ORDER_STATUS.CREATED,
+        order_confirmed_on,
       })
       .where({
         id: orderId,
@@ -141,7 +143,7 @@ export class OrderService {
 
   async getOrderDetails(inputs: Record<string, any>) {
     const user = {
-      role: '21',
+      role: '22',
       orgId: 2,
     };
     inputs.user = user;
