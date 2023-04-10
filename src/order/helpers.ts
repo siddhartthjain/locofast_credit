@@ -16,7 +16,7 @@ export const calculateOrderValue = (
 ) => {
   const price = procurementPrice * quantity;
   const finalPrice = price + (price * GST) / 100;
-  return finalPrice;
+  return Number(finalPrice.toFixed(2));
 };
 
 export const checkQuantity = (

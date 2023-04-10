@@ -32,11 +32,11 @@ export class OrderController {
     return res.success(data);
   }
 
-  @Patch(':orderId/raise-po')
+  @Patch(':orderId/confirm-order')
   async raisePO(@Req() req: Request, @Res() res: Response): Promise<Response> {
     // May be we will have performa invoice here too
     const inputs = req.all();
-    await this.orderServcie.raisePo(inputs);
+    await this.orderServcie.confirmOrder(inputs);
     return res.noContent();
   }
 

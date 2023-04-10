@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDecimal,
   IsDefined,
   IsNumberString,
@@ -15,6 +16,10 @@ export class DispatchOrder {
   quantity: number;
 
   @IsDefined()
+  @IsArray()
+  orderPictures: string[];
+
+  @IsDefined()
   @IsString()
-  dispatchDate: string;
+  locofastInvoice: string;
 }

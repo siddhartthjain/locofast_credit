@@ -2,7 +2,9 @@ import {
   IsDefined,
   IsNumber,
   IsString,
+  Max,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
 
@@ -31,6 +33,8 @@ export class CreateProvisionalOrder {
 
   @IsDefined()
   @IsNumber()
+  @Min(1)
+  @Max(1000000)
   quantity: number;
 
   @IsDefined()

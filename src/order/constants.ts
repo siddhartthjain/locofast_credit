@@ -3,6 +3,8 @@ export const FABRIC_ORDER_DELIVERY_ADDRESS_REPOSITORY =
   'FABRIC_ORDER_DELIVERY_ADDRESS_REPOSITORY';
 export const FABRIC_ORDER_META_DATA_REPOSITORY =
   'FABRIC_ORDER_META_DATA_REPOSITORY';
+export const FABRIC_ORDER_FILE_REPOSITORY = 'FABRIC_ORDER_FILE_REPOSITORY';
+
 export const FABRIC_ORDER_DISPATCH_REPOSITORY =
   'FABRIC_ORDER_DISPATCH_REPOSITORY';
 
@@ -20,6 +22,13 @@ export const ORDER_TABS = {
   PO_RAISED: '3',
   DELIVERED: '4',
   PRODUCTION: '5',
+};
+
+export const FILE_TYPE = {
+  'Proforma Invoice': 1,
+  'Order Picture': 2,
+  'Delivery Proof': 3,
+  'Locofast Invoice': 4,
 };
 
 export const VARIABLE_QUANTITY = 5;

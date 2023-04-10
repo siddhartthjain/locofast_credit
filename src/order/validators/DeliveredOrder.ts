@@ -4,4 +4,8 @@ export class DeliveredOrder {
   @IsDefined()
   @IsString()
   deliveredDate: string;
+
+  @IsDefined()
+  @IsString()
+  proofOfDelivery: string;
 }

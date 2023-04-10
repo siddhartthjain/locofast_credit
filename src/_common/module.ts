@@ -9,10 +9,12 @@ import {
   LF_ROOT_REPOSITORY,
   USER_REPOSITORY,
   CREDIT_INFO_REPO,
+  INVOICING_FILES_REPOSITORY,
 } from './constants';
 import { CommonController } from './controllers';
 import {
   CurrencyRepository,
+  InvoicingFileRepository,
   LfRootRepository,
   UserRepository,
 } from './repositories';
@@ -23,14 +25,14 @@ import { CurrencyService, LfRootService, UserService } from './services';
 import { CommonService } from './services/Commonservice';
 
 @Module({
-  controllers: [CommonController,],
-  imports: [ HttpModule,],
+  controllers: [CommonController],
+  imports: [HttpModule],
   providers: [
     UserService,
     LfRootService,
     CurrencyService,
     ConfigService,
-    
+
     CommonService,
     { provide: USER_REPOSITORY, useClass: UserRepository },
     { provide: LF_ROOT_REPOSITORY, useClass: LfRootRepository },
@@ -46,6 +48,10 @@ import { CommonService } from './services/Commonservice';
     {
       provide: CREDIT_INFO_REPO,
       useClass: CreditInfoRepo,
+    },
+    {
+      provide: INVOICING_FILES_REPOSITORY,
+      useClass: InvoicingFileRepository,
     },
   ],
   exports: [
@@ -53,7 +59,7 @@ import { CommonService } from './services/Commonservice';
     LfRootService,
     CurrencyService,
     ConfigService,
-    
+
     CommonService,
     { provide: USER_REPOSITORY, useClass: UserRepository },
     { provide: LF_ROOT_REPOSITORY, useClass: LfRootRepository },
@@ -69,6 +75,10 @@ import { CommonService } from './services/Commonservice';
     {
       provide: CREDIT_INFO_REPO,
       useClass: CreditInfoRepo,
+    },
+    {
+      provide: INVOICING_FILES_REPOSITORY,
+      useClass: InvoicingFileRepository,
     },
   ],
 })
