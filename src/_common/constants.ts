@@ -91,6 +91,15 @@ export const BRAND_TYPE = {
   SUPPLIER: '10',
 };
 
+export const REDIS_HASH_NAMES = {
+  GST_NUMBER_DETAILS: 'Gst-Number-Details',
+  ATTEMPTS_KEY: `OTP-Attempts:`,
+  BLOCKED_NUMBERS_KEY: `Blocked-Numbers:`,
+  MOBILE_AUTH_KEY: `Mobile-Auth-Key:`,
+  CUSTOMER_VERIFICATION_TOKEN: `Customer-Verification-Token:`,
+  BRANDS_SECRET_KEYS: `Brands-Secret-Keys`,
+  FABRIC_REFERENCE_CODE_ATTEMPT: 'Fabric-Reference-Code-Attempts',
+};
 export const ALLOWED_FILE_DEFAULT_SIZE = 10; // MB
 
 export const GST = 5;

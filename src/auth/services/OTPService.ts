@@ -262,7 +262,7 @@ export class OTPService
           const userDetails = await this.invoicingusers
             .query()
             .select( 'phone_no')
-            .where({ email: inputs.email, role: ROOT_USER_TYPES.CREDIT_CUSTOMER })
+            .where({ email: inputs.email, role:ROOT_USER_TYPES.CREDIT_CUSTOMER })
             .first();
   
           if (!userDetails) {
