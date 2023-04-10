@@ -10,6 +10,7 @@ import { CommonModule } from './_common';
 import { CoreModule } from '@libs/core';
 import { InvoicingRootModule } from './Invoicing_root/module';
 import { HttpModule } from '@nestjs/axios';
+import { AuthModule } from './auth';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { HttpModule } from '@nestjs/axios';
     FabricModule,
     CoreModule,
     InvoicingRootModule,
-    HttpModule
+    HttpModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

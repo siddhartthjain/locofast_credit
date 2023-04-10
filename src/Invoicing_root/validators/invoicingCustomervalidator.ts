@@ -1,12 +1,43 @@
-export class InvoicingCustomerValidator
-{
-    user_id: number;
-    
-    brand_id : number;
+import { GST_NUMBER_REGEX } from '@app/_common';
+import { Type } from 'class-transformer';
+import {
+  IsDefined,
+  IsIn,
+  IsString,
+  IsOptional,
+  IsPhoneNumber,
+  Matches,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+  IsNumber,
+} from 'class-validator';
 
-    first_name: string;
-    last_name: string;
-    is_credit_available: number;
-    credit_period : number;
-    credit_charges : number;
+export class InvoicingCustomerValidator {
+  // @Type(() => Number)
+  @IsDefined()
+  @Type(() => Number)
+  userId: number;
+
+  @Type(() => Number)
+  @IsDefined()
+  @IsNumber()
+  @Min(30)
+  @Max(90)
+  credit_period: number;
+
+  @Type(() => Number)
+  @IsDefined()
+  @IsNumber()
+  @Min(2)
+  @Max(6)
+  creditCharges: number;
+
+  // @IsString()
+  // @Matches(RegExp(GST_NUMBER_REGEX), { message: 'Invalid GST format' })
+  // gst: string;
+
+  // @IsPhoneNumber()
+  // phoneNo: String
 }

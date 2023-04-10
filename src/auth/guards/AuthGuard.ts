@@ -6,6 +6,9 @@ import { RedisService } from '@app/redis/service';
 import { UserService, LfRootService } from '@app/_common';
 import { ConfigService } from '@nestjs/config';
 import { RedisException } from '@libs/core/exceptions/redisException';
+import { InvoicingRootService } from '@app/Invoicing_root/service/InvoicingRootService';
+import { InvoicingUserService } from '@app/_common/services/InvoicingUserService';
+import { skipAuthRoutes } from '../constants';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -14,8 +17,8 @@ export class AuthGuard implements CanActivate {
 
   constructor(
     private readonly redisService: RedisService,
-    private readonly lfRootService: LfRootService,
-    private readonly userService: UserService,
+    private readonly invoicingrootservice: InvoicingRootService,
+    private readonly invoicinguserservice: InvoicingUserService,
     private readonly config: ConfigService,
   ) {
     this.keyPrefix = this.config.get('redis').keyPrefix;
@@ -23,7 +26,6 @@ export class AuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    
     const request = context.switchToHttp().getRequest();
 
     if (request.headers['data-access-key']) {
@@ -37,6 +39,11 @@ export class AuthGuard implements CanActivate {
     }
 
     if (!request.headers['authorization']) {
+      if (skipAuthRoutes.includes(request.route.path)) {
+        console.log('returning true');
+        return true;
+      }
+
       return false;
     }
     const bearer = request.headers['authorization'].split(' ')[1];
@@ -125,7 +132,7 @@ export class AuthGuard implements CanActivate {
         brandId.toString(),
       );
       if (!response) {
-        const orgData = await this.lfRootService.findById(brandId);
+        const orgData = await this.invoicingrootservice.findById(brandId);
         if (orgData && orgData.secretKey) {
           return [orgData.secretKey, true];
         }
@@ -143,7 +150,7 @@ export class AuthGuard implements CanActivate {
         userId.toString(),
       );
       if (!response) {
-        const userData = await this.userService.findById(userId);
+        const userData = await this.invoicinguserservice.getbyId(userId);
 
         if (userData && !userData.isEnabled) {
           return ['', false];

@@ -20,9 +20,12 @@ export default registerAs('dataProvider', () => ({
       method: 'GET',
     },
     getCustomerData: {
-        url: `${baseUrl}/customer/:customerId`,
-        method: 'GET',
-      },
-
+      url: `${baseUrl}/customer/:customerId`,
+      method: 'GET',
+    },
+    getUserData: {
+      url: `${baseUrl}/common/:userId`,
+      method: 'GET',
+    },
   },
 }));
