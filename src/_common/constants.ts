@@ -76,21 +76,37 @@ export const BILL_TO = 'Locofast Online Private Limited';
 export const INVOICING_ROOT_REPO = 'INVOICING_ROOT_REPO';
 export const INVOICING_USER_REPO = 'INVOICING_USER_REPO';
 export const CREDIT_INFO_REPO = 'CREDIT_INFO_REPO';
+export const INVOICING_FILES_REPOSITORY = 'INVOICING_FILES_REPOSITORY';
 
 export const ROOT_USER_TYPES = {
   CREDIT_CUSTOMER: '21',
   SUPPLIER: '22',
 };
 
-
 export const FABRIC_CUSTOMER_ORG_ROLE = '11';
 export const FABRIC_SUPPLIER_ORG_ROLE = '12';
 
-export const BRAND_TYPE =
-{
+export const BRAND_TYPE = {
   CUSTOMER: '11',
-  SUPPLIER: '10'
-}
+  SUPPLIER: '10',
+};
 
+export const ALLOWED_FILE_DEFAULT_SIZE = 10; // MB
 
 export const GST = 5;
+
+export const FILE_TITLE = {
+  proformaInvoice: 'Proforma Invoice',
+  supplierLists: 'Supplier Lists',
+  locofastInvoice: 'Locofast Invoice',
+  orderPicture: 'Order Picture',
+  deliveryProof: 'Delivery Proof',
+};
+
+export const FILE_TITLE_REVERSE = {
+  'Proforma Invoice': 'proformaInvoice',
+  'Supplier Lists': 'supplierLists',
+  'Locofast Invoice': 'locofastInvoice',
+  'Order Picture': 'orderPicture',
+  'Delivery Proof': 'deliveryProof',
+};

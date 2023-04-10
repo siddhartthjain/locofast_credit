@@ -1,4 +1,10 @@
-import { getFormattedDateString } from '@app/_common';
+import {
+  ALLOWED_FILE_TYPES,
+  FILE_TITLE,
+  INVOICING_FILES_REPOSITORY,
+  InvoicingFilesContract,
+  getFormattedDateString,
+} from '@app/_common';
 import {
   Inject,
   Injectable,
@@ -6,31 +12,47 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import moment from 'moment';
-import { FabricContract } from 'src/fabric';
 import {
-  FABRIC_ORDER_DELIVERY_ADDRESS_REPOSITORY,
   FABRIC_ORDER_DISPATCH_REPOSITORY,
+  FABRIC_ORDER_FILE_REPOSITORY,
   FABRIC_ORDER_REPOSITORY,
+  FILE_TYPE,
   ORDER_STATUS,
 } from '../constants';
 import { checkQuantity } from '../helpers';
 import { FabricOrder } from '../models';
 import {
   FabricOrderContract,
-  FabricOrderDispatchContract,
+  FabricOrderDipatchContract,
+  FabricOrderFileContract,
 } from '../repositories';
 import { BaseValidator } from '@libs/core/validator';
 import { DeliveredOrder } from '../validators/DeliveredOrder';
-import { GetOrders } from '../interfaces';
+import { ConfirmOrder, DispatchOrder } from '../validators';
+import { FileService, MediaService } from '@app/media/services';
+import { ConfigService } from '@nestjs/config';
+import { Transaction } from 'objection';
 
 @Injectable()
 export class OrderService {
+  private orderFilesBucket;
   constructor(
     @Inject(FABRIC_ORDER_REPOSITORY) private fabricOrder: FabricOrderContract,
     @Inject(FABRIC_ORDER_DISPATCH_REPOSITORY)
-    private fabricOrderDispatch: FabricOrderDispatchContract,
+    private fabricOrderDispatch: FabricOrderDipatchContract,
+    @Inject(INVOICING_FILES_REPOSITORY)
+    private invoicingFiles: InvoicingFilesContract,
+    @Inject(FABRIC_ORDER_FILE_REPOSITORY)
+    private fabricOrderFile: FabricOrderFileContract,
     private validator: BaseValidator,
-  ) {}
+    private fileService: FileService,
+    private s3MediaService: MediaService,
+    private readonly config: ConfigService,
+  ) {
+    const serviceConfig = this.config.get('services');
+    const { s3: s3ServiceConfig } = serviceConfig;
+    this.orderFilesBucket = s3ServiceConfig.order.bucketName;
+  }
 
   async getOrders(inputs: Record<string, any>) {
     const { orderTab, limit, sortOrder, pageNo } = inputs;
@@ -56,43 +78,67 @@ export class OrderService {
     return data;
   }
 
-  async raisePo(inputs: Record<string, any>) {
-    const { orderId } = inputs;
-    const order_confirmed_on = getFormattedDateString(new Date().toISOString());
-    await this.fabricOrder
-      .query()
-      .patch({
-        status: ORDER_STATUS.CREATED,
-        order_confirmed_on,
-      })
-      .where({
-        id: orderId,
-        status: ORDER_STATUS.PROVISIONAL,
-      });
+  async confirmOrder(inputs: Record<string, any>) {
+    const user = {
+      role: '17',
+      oid: 2, // will be 1 LocoAdmin brand
+      uid: 1,
+    };
+    const proformaFileMetaData = await this.confirmOrderCustomValidator(
+      inputs,
+      user,
+    );
+
+    const trx = await FabricOrder.startTransaction();
+    try {
+      await this.fileUpload(proformaFileMetaData, inputs.orderId, user, trx);
+
+      const orderConfirmedOn = getFormattedDateString(new Date().toISOString());
+      await this.fabricOrder
+        .query(trx)
+        .patch({
+          status: ORDER_STATUS.CREATED,
+          orderConfirmedOn,
+        })
+        .where({
+          id: inputs.orderId,
+          status: ORDER_STATUS.PROVISIONAL,
+        });
+      await trx.commit();
+    } catch (error) {
+      console.log('Error in confirming Order', error);
+      await trx.rollback();
+      throw new InternalServerErrorException('Something went wrong');
+    }
 
     return;
   }
 
   async dispatchOrder(inputs: Record<string, any>) {
     const { orderId } = inputs;
-    const { dispatchDetails } = await this.dispatchOrderCustomValidator(inputs);
+    const user = {
+      role: '22',
+      oid: 4,
+      uid: 4,
+    };
+    const { dispatchDetails, dispatchFilesMetaData } =
+      await this.dispatchOrderCustomValidator(inputs, user);
 
-    // will have files too
     const trx = await FabricOrder.startTransaction();
     try {
+      await this.fileUpload(dispatchFilesMetaData, orderId, user, trx);
+
       await this.fabricOrder
         .query(trx)
         .patch({
           status: ORDER_STATUS.DISPATCHED,
-          modified_by: 2,
+          modified_by: user.uid,
         })
         .where({
           id: orderId,
         });
 
       await this.fabricOrderDispatch.query(trx).insert(dispatchDetails);
-
-      // have to upload files too
       await trx.commit();
     } catch (error) {
       console.log('Error marking order dispatch: ', error);
@@ -103,15 +149,19 @@ export class OrderService {
   }
 
   async markOrderDelivered(inputs: Record<string, any>) {
-    const { deliveredDate } = await this.markOrderDeliveredCustomValidator(
-      inputs,
-    );
-
+    const { deliveredDate, proofOfDeliveryMetaData } =
+      await this.markOrderDeliveredCustomValidator(inputs);
+    const user = {
+      role: '22',
+      oid: 4,
+      uid: 4,
+    };
     const { orderId } = inputs;
-    // will have files too
 
     const trx = await FabricOrder.startTransaction();
     try {
+      await this.fileUpload(proofOfDeliveryMetaData, orderId, user, trx);
+
       await this.fabricOrder
         .query(trx)
         .patch({
@@ -151,38 +201,105 @@ export class OrderService {
     return data;
   }
 
+  async fileUpload(
+    files: Record<string, any>[],
+    orderId: string,
+    user: Record<string, any>,
+    trx: Transaction,
+  ) {
+    /*
+ {
+    mimeType: 'application/pdf',
+    fileSize: 0.221765,
+    originalName: 'Screenshot-(119)_1680890503753_1958.pdf',
+    fileUrl: 'https://lftest-media.s3.ap-south-1.amazonaws.com/Screenshot-(119)_1680890503753_1958.pdf',
+    fieldName: 'Order Pictures'
+  },
+*/
+    const { oid, uid } = user;
+
+    await Promise.all(
+      files.map(async (file) => {
+        const { fieldName, originalName, mimeType, fileUrl } = file;
+        const invoicingFile = await this.invoicingFiles.query(trx).insert({
+          name: originalName,
+          title: fieldName,
+          org_id: oid,
+          file_type: ALLOWED_FILE_TYPES[mimeType] || 0,
+          mimeType,
+          url: fileUrl,
+          createdBy: uid,
+          modifiedBy: uid,
+        });
+
+        await this.fabricOrderFile.query(trx).insert({
+          orderId,
+          fileId: invoicingFile.id,
+          fileType: FILE_TYPE[fieldName] || 0,
+          createdBy: uid,
+          modifiedBy: uid,
+        });
+      }),
+    );
+  }
+
   async dispatchOrderCustomValidator(
     inputs: Record<string, any>,
+    user: Record<string, any>,
   ): Promise<Record<string, any>> {
-    const { user, ...resource } = inputs;
-    const fabricOrder = await this.fabricOrder.firstWhere({
-      id: resource.orderId,
-    });
+    await this.validator.fire(inputs, DispatchOrder);
 
+    const { orderPictures, locofastInvoice, orderId, quantity } = inputs;
+    const fabricOrder = await this.fabricOrder.firstWhere({
+      id: orderId,
+    });
     if (fabricOrder.status != ORDER_STATUS.CREATED) {
       throw new UnprocessableEntityException('Cannot Mark This Order');
     }
 
-    if (!checkQuantity(parseFloat(fabricOrder.quantity), resource.quantity)) {
+    if (!checkQuantity(parseFloat(fabricOrder.quantity), quantity)) {
       throw new UnprocessableEntityException('This is not the order quantity');
     }
 
-    resource.dispatchDate = getFormattedDateString(new Date().toISOString());
+    if (orderPictures.length > 4) {
+      throw new UnprocessableEntityException('Can Only Add upto 4 Pictures');
+    }
+
+    const orderFiles = [];
+    orderPictures.forEach((picture) => {
+      const file = {
+        url: picture,
+        fieldName: FILE_TITLE.orderPicture,
+      };
+      orderFiles.push(file);
+    });
+
+    orderFiles.push({
+      url: locofastInvoice,
+      fieldName: FILE_TITLE.locofastInvoice,
+    });
+
+    const dispatchFilesMetaData = await this.orderFilesCustomValidator(
+      orderFiles,
+    );
+
+    const dispatchDate = getFormattedDateString(new Date().toISOString());
     const dispatchDetails = {
-      orderId: resource.orderId,
-      quantity: resource.quantity,
-      dispatch_date: resource.dispatchDate,
-      created_by: 3,
-      modified_by: 3,
+      orderId,
+      quantity,
+      dispatchDate,
+      created_by: user.uid,
+      modified_by: user.uid,
     };
-    return { dispatchDetails };
+
+    return { dispatchDetails, dispatchFilesMetaData };
   }
 
   async markOrderDeliveredCustomValidator(
     inputs: Record<string, any>,
   ): Promise<Record<string, any>> {
     await this.validator.fire(inputs, DeliveredOrder);
-    const { orderId } = inputs;
+    const { orderId, proofOfDelivery } = inputs;
     const fabricOrder = await this.fabricOrder.firstWhere({
       id: orderId,
     });
@@ -199,6 +316,84 @@ export class OrderService {
       );
     }
 
-    return { deliveredDate };
+    const proofOfDeliveryFile = [
+      { url: proofOfDelivery, fieldName: FILE_TITLE.deliveryProof },
+    ];
+
+    const proofOfDeliveryMetaData = await this.orderFilesCustomValidator(
+      proofOfDeliveryFile,
+    );
+
+    return { deliveredDate, proofOfDeliveryMetaData };
+  }
+
+  async confirmOrderCustomValidator(
+    inputs: Record<string, any>,
+    user: Record<string, any>,
+  ): Promise<Record<string, any>[]> {
+    await this.validator.fire(inputs, ConfirmOrder);
+
+    const { orderId, proformaInvoice } = inputs;
+
+    const orderDetails = await this.fabricOrder.firstWhere({ id: orderId });
+
+    if (orderDetails.status != ORDER_STATUS.PROVISIONAL) {
+      throw new UnprocessableEntityException(`Order Already Confirmed!`);
+    }
+
+    const proformaInvoiceFile = [
+      {
+        url: proformaInvoice,
+        fieldName: FILE_TITLE.proformaInvoice,
+      },
+    ];
+
+    const proformaInvoiceMetaData = await this.orderFilesCustomValidator(
+      proformaInvoiceFile,
+    );
+
+    return proformaInvoiceMetaData;
+  }
+
+  async orderFilesCustomValidator(
+    orderFiles: Record<string, any>[],
+  ): Promise<Record<string, any>[]> {
+    const orderFilesMetaData = [];
+
+    await Promise.all(
+      orderFiles.map(async (orderFile) => {
+        orderFile.url = decodeURI(orderFile.url);
+        const orderFileMetaData =
+          await this.fileService.parseFileMetadataFromUrl(orderFile.url);
+        orderFileMetaData.fieldName = orderFile.fieldName;
+        orderFilesMetaData.push(orderFileMetaData);
+      }),
+    );
+
+    const metaDataToVerify = orderFilesMetaData.map((metaData) => {
+      const { mimeType, fileSize } = metaData;
+      return {
+        fileMetaData: { mimeType, fileSize },
+      };
+    });
+
+    this.fileService.validateFiles(metaDataToVerify);
+
+    const objectsToCopy = orderFilesMetaData.map((file) => {
+      return {
+        fileName: file.originalName,
+        targetBucket: this.orderFilesBucket,
+      };
+    });
+
+    const newOrderFiles = await this.s3MediaService.copyObjectsToTargetBucket(
+      objectsToCopy,
+    );
+
+    orderFilesMetaData.forEach((fileMetaData, index) => {
+      fileMetaData.fileUrl = newOrderFiles[index].fileUrl;
+    });
+
+    return orderFilesMetaData;
   }
 }

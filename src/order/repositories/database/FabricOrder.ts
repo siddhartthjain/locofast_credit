@@ -7,7 +7,6 @@ import { FabricOrderContract } from '../contracts';
 import { activeOrders, orderStatus } from '@app/order/helpers';
 import { ROOT_USER_TYPES } from '@app/_common';
 import get from 'lodash';
-import { raw } from 'objection';
 @Injectable()
 export class FabricOrderRepository extends DB implements FabricOrderContract {
   @InjectModel(FabricOrder)
@@ -144,8 +143,6 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
   async getOrderDetails(
     inputs: Record<string, any>,
   ): Promise<Record<string, any>> {
-    //  console.log(inputs);
-    //will have porforma invoice file too
     const { orderId, user } = inputs;
 
     const query = this.query()
@@ -162,9 +159,11 @@ export class FabricOrderRepository extends DB implements FabricOrderContract {
 
     let graphQuery = '';
     if (user.role === ROOT_USER_TYPES.CREDIT_CUSTOMER) {
-      graphQuery = `[fabric(fabricDetails) , supplier(suplierDetails) , payment(paymentDetails) , delivery(deliveryDetails) ,unit(unitsDetails)]`;
+      graphQuery = `[fabric(fabricDetails) , supplier(suplierDetails) , payment(paymentDetails) , delivery(deliveryDetails) ,
+        unit(unitsDetails) ,customerFiles(fabricOrderFilesDetails).file(invoicingFileDetails)]`;
     } else if (user.role === ROOT_USER_TYPES.SUPPLIER) {
-      graphQuery = `[fabric(fabricDetails) , supplier(suplierDetails) , delivery(deliveryDetails),unit(unitsDetails)]`;
+      graphQuery = `[fabric(fabricDetails) , supplier(suplierDetails) , delivery(deliveryDetails),unit(unitsDetails),
+        orderFiles(fabricOrderFilesDetails).file(invoicingFileDetails)]`;
     }
 
     query.withGraphJoined(graphQuery);

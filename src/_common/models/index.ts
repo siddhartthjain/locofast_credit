@@ -8,3 +8,4 @@ export * from './UserOrg';
 export * from './GstNumberDetails';
 export * from './InvoicingRoot';
 export * from './InvoicingUsers';
+export * from './InvoicingFiles';

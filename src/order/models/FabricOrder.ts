@@ -4,6 +4,8 @@ import { BaseModel } from '@libs/core';
 import { FabricOrderMetaData } from './FabricOrderMetaData';
 import { FabricOrderDeliveryAddress } from './FabricOrderDeliveryAddress';
 import { Units } from '@app/_common';
+import { FabricOrderFiles } from './FabricOrderFile';
+import { FILE_TYPE, ORDER_STATUS } from '../constants';
 
 export class FabricOrder extends BaseModel {
   static tableName = 'fabric_orders';
@@ -50,6 +52,32 @@ export class FabricOrder extends BaseModel {
         join: {
           from: 'fabric_orders.unit_id',
           to: 'units.id',
+        },
+      },
+      orderFiles: {
+        relation: BaseModel.HasManyRelation,
+        modelClass: FabricOrderFiles,
+        filter: (builder) =>
+          builder.whereIn('fabric_order_files.file_type', [
+            FILE_TYPE['Order Picture'],
+            FILE_TYPE['Locofast Invoice'],
+          ]),
+        join: {
+          from: 'fabric_orders.id',
+          to: 'fabric_order_files.order_id',
+        },
+      },
+      customerFiles: {
+        relation: BaseModel.HasOneRelation,
+        modelClass: FabricOrderFiles,
+        filter: (builder) =>
+          builder.where(
+            'fabric_order_files.file_type',
+            FILE_TYPE['Proforma Invoice'],
+          ),
+        join: {
+          from: 'fabric_orders.id',
+          to: 'fabric_order_files.order_id',
         },
       },
     };
