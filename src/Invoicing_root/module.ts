@@ -11,5 +11,6 @@ import { CoreModule } from '@libs/core';
   imports: [CommonModule, CoreModule],
   providers: [InvoicingRootService],
   controllers: [InvoicingRootController],
+  exports: [InvoicingRootService],
 })
 export class InvoicingRootModule {}

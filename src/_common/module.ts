@@ -23,6 +23,7 @@ import { InvoicingRootRepository } from './repositories/database/InvoicingRoot';
 import { InvoicingUserRepository } from './repositories/database/Users';
 import { CurrencyService, LfRootService, UserService } from './services';
 import { CommonService } from './services/Commonservice';
+import { InvoicingUserService } from './services/InvoicingUserService';
 
 @Module({
   controllers: [CommonController],
@@ -32,7 +33,7 @@ import { CommonService } from './services/Commonservice';
     LfRootService,
     CurrencyService,
     ConfigService,
-
+    InvoicingUserService,
     CommonService,
     { provide: USER_REPOSITORY, useClass: UserRepository },
     { provide: LF_ROOT_REPOSITORY, useClass: LfRootRepository },
@@ -59,6 +60,7 @@ import { CommonService } from './services/Commonservice';
     LfRootService,
     CurrencyService,
     ConfigService,
+    InvoicingUserService,
 
     CommonService,
     { provide: USER_REPOSITORY, useClass: UserRepository },
