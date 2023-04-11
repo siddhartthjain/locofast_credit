@@ -7,6 +7,11 @@ import rateLimit from 'express-rate-limit';
 import { ConfigService } from '@nestjs/config';
 import { CommonModule, LfRootService } from './_common';
 import { ExceptionFilter, RequestGuard } from '@libs/core';
+import { RedisService } from './redis/service';
+import { AuthGuard } from './auth';
+import { InvoicingRootModule } from './Invoicing_root/module';
+import { InvoicingRootService } from './Invoicing_root/service/InvoicingRootService';
+import { InvoicingUserService } from './_common/services/InvoicingUserService';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,9 +37,13 @@ app.enableCors({
 });
 
   app.use(rateLimit({ windowMs: 60, max: 50 }));
-  const lfRootService = app
+  const invoicingRootService = app
+    .select(InvoicingRootModule)
+    .get(InvoicingRootService, { strict: true });
+
+  const invoicingUserService = app
     .select(CommonModule)
-    .get(LfRootService, { strict: true });
+    .get(InvoicingUserService, { strict: true });
 
   /* const userService = app
     .select(CommonModule)
@@ -43,7 +52,12 @@ app.enableCors({
   // guards
   app.useGlobalGuards(
     new RequestGuard(),
-    // new AuthGuard(new RedisService(config), lfRootService, userService, config),
+    new AuthGuard(
+      new RedisService(config),
+      invoicingRootService,
+      invoicingUserService,
+      config,
+    ),
   );
 
   // filters
