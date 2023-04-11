@@ -18,6 +18,19 @@ async function bootstrap() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
   app.use(helmet());
+ 
+  const allowedOrigin = (process.env.APP_ALLOWED_ORIGIN || '')
+  .split(',')
+  .map(url => url.trim());
+
+app.enableCors({
+  origin: allowedOrigin,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  credentials: true,
+});
+
   app.use(rateLimit({ windowMs: 60, max: 50 }));
   const lfRootService = app
     .select(CommonModule)
