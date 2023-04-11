@@ -29,11 +29,11 @@ async function bootstrap() {
   .map(url => url.trim());
 
 app.enableCors({
-  origin: allowedOrigin,
+  origin: '*',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   preflightContinue: false,
   optionsSuccessStatus: 204,
-  credentials: true,
+ // credentials: true,
 });
 
   app.use(rateLimit({ windowMs: 60, max: 50 }));
